@@ -730,7 +730,7 @@ body>.wrap{margin-top:20px}body.period-is-empty main.wrap>section.panel{display:
     switcher.append(caption);
   }
 
-  switcher.addEventListener('click',event=>{const button=event.target.closest('button[data-period]');if(!button||button.dataset.period===ACTIVE_PERIOD)return;const url=new URL(location.href);url.searchParams.set('period',button.dataset.period);url.hash='';location.href=url.href;});
+  switcher.addEventListener('click',event=>{const button=event.target.closest('button[data-period]');if(!button||button.dataset.period===ACTIVE_PERIOD)return;const url=new URL(location.href);url.searchParams.set('period',button.dataset.period);url.hash='';window.ETF_SAVE_PERIOD_POSITION?.(button.dataset.period);location.href=url.href;});
   document.title=`ETF数据看板 · ${D.periodLabel} · ${D.range.split('至').pop().trim()}`;
   document.querySelector('.hero h1').innerHTML=`ETF${D.periodLabel}变化<span class="scope-note">非货非债</span>`;
   const replacements=[['近1周份额增长率',D.periodLabel+'份额增长率'],['近1周净流入',D.periodLabel+'净流入'],['最近一周',D.periodLabel],['近一周',D.periodLabel],['本周','本区间']];
@@ -1060,4 +1060,52 @@ body>.wrap{margin-top:20px}body.period-is-empty main.wrap>section.panel{display:
  .direction-signal-card li{gap:6px}
 }
 </style>
+<style id="compact-conclusion-cards">
+#overview #conclusions{align-items:start!important;gap:12px!important}
+#overview #conclusions>.conclusion{min-height:0!important;height:auto!important;padding:13px 15px!important;align-self:start}
+#overview #conclusions>.conclusion h3{margin-bottom:8px!important}
+#overview #conclusions .upgrade-insights{gap:0!important}
+#overview #conclusions .upgrade-insights li{padding-top:6px!important;padding-bottom:6px!important}
+#overview #conclusions .flow-mainlines{gap:10px}
+#overview #conclusions .flow-mainline+.flow-mainline{padding-top:8px}
+#overview #conclusions .flow-mainline h4{margin:0 0 4px}
+#overview #conclusions .upgrade-conclusion-note{margin-top:7px!important}
+@media(min-width:1200px){
+ #overview #conclusions{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ #overview #conclusions>.upgrade-market-brief{grid-column:1/-1!important}
+ #overview #conclusions>.upgrade-followup{grid-column:auto!important}
+ #overview #conclusions .upgrade-followup .upgrade-insights li{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}
+ #overview #conclusions .upgrade-followup .upgrade-insight-number{grid-column:1/-1;grid-row:2;text-align:left}
+ #overview #conclusions .upgrade-followup .upgrade-peer-action{grid-column:2;grid-row:1}
+ #overview #conclusions .upgrade-followup .upgrade-insights button{min-width:0}
+ #overview #conclusions .flow-mainline .upgrade-insight-number{white-space:nowrap;text-align:right}
+ #overview #conclusions .flow-mainline .upgrade-insight-number>span{display:inline}
+ #overview #conclusions .upgrade-share-metrics{gap:8px}
+}
+</style>
+<script id="period-reading-position">
+(()=>{
+ const key='etf-period-reading-position:'+location.pathname;
+
+ const topEdge=()=>{
+   const bar=document.querySelector('.period-switcher');
+   const header=document.querySelector('header'),nav=document.querySelector('.dashboard-nav');
+   const navHeight=nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
+   return (header?.getBoundingClientRect().height||0)+navHeight+(bar?.getBoundingClientRect().height||0);
+ };
+ window.ETF_SAVE_PERIOD_POSITION=period=>{
+   const edge=topEdge()+12,sections=[...document.querySelectorAll('main section.panel[id]')];
+   const section=sections.filter(el=>el.getBoundingClientRect().top<=edge+30).at(-1)||sections[0];
+   try{sessionStorage.setItem(key,JSON.stringify({period,id:section?.id,offset:section?Math.max(0,edge-section.getBoundingClientRect().top):0,scrollY}));}catch{}
+ };
+ let saved;try{saved=JSON.parse(sessionStorage.getItem(key)||'null');sessionStorage.removeItem(key);}catch{}
+ if(!saved||saved.period!==ACTIVE_PERIOD)return;
+ const restore=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   const section=document.getElementById(saved.id),edge=topEdge()+12;
+   const offset=section?Math.min(saved.offset,Math.max(0,section.offsetHeight-150)):0;
+   window.scrollTo({top:section?scrollY+section.getBoundingClientRect().top+offset-edge:saved.scrollY,behavior:'instant'});
+ }));
+ if(document.readyState==='complete')restore();else window.addEventListener('load',()=>setTimeout(restore,120),{once:true});
+})();
+</script>
 </body></html>
