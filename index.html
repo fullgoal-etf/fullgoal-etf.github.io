@@ -392,9 +392,9 @@ html body .peer-table.reading-table thead tr th:nth-child(n),html body .peer-tab
 #conclusions .conclusion-market-breakdown{grid-column:1/-1;flex-basis:100%;width:100%;margin-top:5px;color:#56697c;font-size:13px;line-height:1.8}
 #conclusions .conclusion-market-breakdown>div{margin-top:3px}
 #conclusions .conclusion-market-breakdown b{color:#234d75;font-weight:600}
-</style></head><body><p style="padding:24px;color:#53657a">正在加载ETF数据…</p><script src="assets/dashboard-app.js?v=92ccd6c630eaa9dc"></script><script>
+</style></head><body><p style="padding:24px;color:#53657a">正在加载ETF数据…</p><script src="assets/dashboard-app.js?v=53fcce274d236ff9"></script><script>
 (()=>{
- const version='92ccd6c630eaa9dc',cache=new Map(),peerCache=new Map();let cleanup=()=>{},request=0;
+ const version='53fcce274d236ff9',cache=new Map(),peerCache=new Map();let cleanup=()=>{},request=0;
  const get=path=>fetch(path+'?v='+version).then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json()});
  const load=k=>{if(!cache.has(k))cache.set(k,get('data/'+k+'.json').catch(e=>{cache.delete(k);throw e}));return cache.get(k)};
  window.ETF_LOAD_PEERS=async(k,d)=>{if(d.peer_catalog_details)return;if(!peerCache.has(k))peerCache.set(k,get('data/peers-'+k+'.json').catch(e=>{peerCache.delete(k);throw e}));d.peer_catalog_details=await peerCache.get(k)};
