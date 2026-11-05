@@ -272,7 +272,7 @@ let navigationPending=false;
 function updateNavigation(){
  const headerHeight=document.querySelector('header')?.getBoundingClientRect().height||0;
  document.documentElement.style.setProperty('--header-height',headerHeight+'px');
- const nav=document.querySelector('.dashboard-nav'),navHeight=nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
+ const nav=document.querySelector('.dashboard-nav'),navHeight=innerWidth<1200&&nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
  const periodHeight=document.querySelector('.period-switcher')?.getBoundingClientRect().height||0;
  const offset=headerHeight+navHeight+periodHeight+16;
  document.documentElement.style.setProperty('--dashboard-anchor-offset',offset+'px');
@@ -309,7 +309,7 @@ decorateTables();updateControlState();updateNavigation();
   function updateNav(){
  const headerHeight=document.querySelector('header')?.getBoundingClientRect().height||0;
  document.documentElement.style.setProperty('--header-height',headerHeight+'px');
- const nav=document.querySelector('.dashboard-nav'),navHeight=nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
+ const nav=document.querySelector('.dashboard-nav'),navHeight=innerWidth<1200&&nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
  const periodHeight=document.querySelector('.period-switcher')?.getBoundingClientRect().height||0;
  const offset=headerHeight+navHeight+periodHeight+16;
  document.documentElement.style.setProperty('--dashboard-anchor-offset',offset+'px');
@@ -351,7 +351,7 @@ decorateTables();updateControlState();updateNavigation();
   hero.after(switcher);
   const updatePeriodStickyTop=()=>{
     const header=document.querySelector('header'),nav=document.querySelector('.dashboard-nav');
-    const navHeight=nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
+    const navHeight=innerWidth<1200&&nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
     document.documentElement.style.setProperty('--period-sticky-top',((header?.getBoundingClientRect().height||0)+navHeight)+'px');
   };
   const periodResize=new ResizeObserver(updatePeriodStickyTop);
@@ -662,7 +662,7 @@ decorateTables();updateControlState();updateNavigation();
  const topEdge=()=>{
    const bar=document.querySelector('.period-switcher');
    const header=document.querySelector('header'),nav=document.querySelector('.dashboard-nav');
-   const navHeight=nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
+   const navHeight=innerWidth<1200&&nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
    return (header?.getBoundingClientRect().height||0)+navHeight+(bar?.getBoundingClientRect().height||0);
  };
  window.ETF_SAVE_PERIOD_POSITION=period=>{
@@ -737,6 +737,6 @@ new MutationObserver(records=>{if(records.every(r=>r.target.nodeType===1&&r.targ
 window.addEventListener('resize',()=>{if(!scheduled){scheduled=true;requestAnimationFrame(sync)}});sync();
 })();
 
-(()=>{const nav=document.querySelector('.dashboard-nav');if(!nav)return;nav.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const target=document.getElementById(a.hash.slice(1));if(!target)return;e.preventDefault();const header=document.querySelector('header')?.getBoundingClientRect().height||0,nh=getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0,ph=document.querySelector('.period-switcher')?.getBoundingClientRect().height||0;history.replaceState(null,'',a.hash);window.scrollTo({top:Math.max(0,scrollY+target.getBoundingClientRect().top-header-nh-ph-16),behavior:'instant'});window.dispatchEvent(new Event('scroll'))});window.addEventListener('resize',()=>window.dispatchEvent(new Event('scroll')));})();
+(()=>{const nav=document.querySelector('.dashboard-nav');if(!nav)return;nav.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const target=document.getElementById(a.hash.slice(1));if(!target)return;e.preventDefault();const header=document.querySelector('header')?.getBoundingClientRect().height||0,nh=innerWidth<1200&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0,ph=document.querySelector('.period-switcher')?.getBoundingClientRect().height||0;history.replaceState(null,'',a.hash);window.scrollTo({top:Math.max(0,scrollY+target.getBoundingClientRect().top-header-nh-ph-16),behavior:'instant'});window.dispatchEvent(new Event('scroll'))});window.addEventListener('resize',()=>window.dispatchEvent(new Event('scroll')));})();
 (()=>{const root=document.querySelector('#directionRankingBoard');if(!root)return;let queued=false;const measure=()=>{queued=false;const wrap=root.querySelector('.direction-board>.tablewrap,.direction-board .vu-table-shell>.tablewrap');if(!wrap)return;const value=Math.max(240,wrap.clientWidth-30)+'px';if(root.style.getPropertyValue('--direction-detail-width')!==value)root.style.setProperty('--direction-detail-width',value)};const schedule=()=>{if(!queued){queued=true;requestAnimationFrame(measure)}};new ResizeObserver(schedule).observe(root);new MutationObserver(schedule).observe(root,{childList:true,subtree:true});schedule()})();
 }};
