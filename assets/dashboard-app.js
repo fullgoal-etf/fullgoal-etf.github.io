@@ -270,16 +270,16 @@ document.querySelector('header').after(navContainer);
 const navigationItems=[...nav.querySelectorAll('a')].map(link=>({link,section:document.querySelector(link.getAttribute('href'))})).filter(item=>item.section);
 let navigationPending=false;
 function updateNavigation(){
- const header=document.querySelector('header'),headerHeight=header.getBoundingClientRect().height;
+ const headerHeight=document.querySelector('header')?.getBoundingClientRect().height||0;
  document.documentElement.style.setProperty('--header-height',headerHeight+'px');
- const threshold=headerHeight+(window.innerWidth<1200?navContainer.getBoundingClientRect().height:0)+24;
- let active=navigationItems[0];
- navigationItems.forEach(item=>{if(item.section.getBoundingClientRect().top<=threshold)active=item});
- if(window.scrollY+window.innerHeight>=document.documentElement.scrollHeight-3)active=navigationItems[navigationItems.length-1];
- navigationItems.forEach(item=>{
-  item.link.classList.toggle('active',item===active);
-  if(item===active)item.link.setAttribute('aria-current','location');else item.link.removeAttribute('aria-current');
- });
+ const nav=document.querySelector('.dashboard-nav'),navHeight=nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
+ const periodHeight=document.querySelector('.period-switcher')?.getBoundingClientRect().height||0;
+ const offset=headerHeight+navHeight+periodHeight+16;
+ document.documentElement.style.setProperty('--dashboard-anchor-offset',offset+'px');
+ const items=[...document.querySelectorAll('.dashboard-nav .nav a')].map(link=>({link,section:document.getElementById(link.hash.slice(1))})).filter(x=>x.section).sort((a,b)=>a.section.getBoundingClientRect().top-b.section.getBoundingClientRect().top);
+ let active=items[0];for(const item of items){if(item.section.getBoundingClientRect().top<=offset+2)active=item}
+ if(scrollY>0&&scrollY+innerHeight>=document.documentElement.scrollHeight-3)active=items.at(-1);
+ for(const item of items){const on=item===active;if(item.link.classList.contains('active')!==on)item.link.classList.toggle('active',on);if(on)item.link.setAttribute('aria-current','location');else item.link.removeAttribute('aria-current')}
 }
 window.addEventListener('scroll',()=>{
  if(navigationPending)return;
@@ -307,16 +307,17 @@ decorateTables();updateControlState();updateNavigation();
     });
   }
   function updateNav(){
-    const chromeOffset=(document.querySelector('header')?.offsetHeight||0)+(innerWidth<=900?(document.querySelector('.dashboard-nav')?.offsetHeight||0):18)+38;
-    // Activate the section as its heading enters the main reading zone. This
-    // is intentionally lower than the sticky chrome because wide tables make
-    // native anchor positioning settle below the top navigation on phones.
-    const offset=Math.max(chromeOffset,innerHeight*.62);
-    let current=sections[0];
-    for(const id of sections){const el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<=offset)current=id}
-    if(innerHeight+scrollY>=document.documentElement.scrollHeight-8)current=sections.at(-1);
-    document.querySelectorAll('.nav a').forEach(a=>{const active=a.getAttribute('href')==='#'+current;if(a.classList.contains('active')!==active)a.classList.toggle('active',active);if(active){if(a.getAttribute('aria-current')!=='location')a.setAttribute('aria-current','location')}else if(a.hasAttribute('aria-current'))a.removeAttribute('aria-current')});
-  }
+ const headerHeight=document.querySelector('header')?.getBoundingClientRect().height||0;
+ document.documentElement.style.setProperty('--header-height',headerHeight+'px');
+ const nav=document.querySelector('.dashboard-nav'),navHeight=nav&&getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0;
+ const periodHeight=document.querySelector('.period-switcher')?.getBoundingClientRect().height||0;
+ const offset=headerHeight+navHeight+periodHeight+16;
+ document.documentElement.style.setProperty('--dashboard-anchor-offset',offset+'px');
+ const items=[...document.querySelectorAll('.dashboard-nav .nav a')].map(link=>({link,section:document.getElementById(link.hash.slice(1))})).filter(x=>x.section).sort((a,b)=>a.section.getBoundingClientRect().top-b.section.getBoundingClientRect().top);
+ let active=items[0];for(const item of items){if(item.section.getBoundingClientRect().top<=offset+2)active=item}
+ if(scrollY>0&&scrollY+innerHeight>=document.documentElement.scrollHeight-3)active=items.at(-1);
+ for(const item of items){const on=item===active;if(item.link.classList.contains('active')!==on)item.link.classList.toggle('active',on);if(on)item.link.setAttribute('aria-current','location');else item.link.removeAttribute('aria-current')}
+}
   let scheduled=false;function scheduleNav(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;updateNav();setTimeout(updateNav,90)})}
   function decorateDirectionTables(){
     const headers=[['排名','优先级'],['投资方向','赛道分类'],['全市场','规模'],['富国','规模'],['全市场','近一周净流入'],['富国','近一周净流入'],['富国规模','市占率'],['富国净流入','市占率'],['净流入 TOP3','市场领先产品'],['富国相关ETF','产品与规模']];
@@ -736,4 +737,5 @@ new MutationObserver(records=>{if(records.every(r=>r.target.nodeType===1&&r.targ
 window.addEventListener('resize',()=>{if(!scheduled){scheduled=true;requestAnimationFrame(sync)}});sync();
 })();
 
+(()=>{const nav=document.querySelector('.dashboard-nav');if(!nav)return;nav.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const target=document.getElementById(a.hash.slice(1));if(!target)return;e.preventDefault();const header=document.querySelector('header')?.getBoundingClientRect().height||0,nh=getComputedStyle(nav).position==='sticky'?nav.getBoundingClientRect().height:0,ph=document.querySelector('.period-switcher')?.getBoundingClientRect().height||0;history.replaceState(null,'',a.hash);window.scrollTo({top:Math.max(0,scrollY+target.getBoundingClientRect().top-header-nh-ph-16),behavior:'instant'});window.dispatchEvent(new Event('scroll'))});window.addEventListener('resize',()=>window.dispatchEvent(new Event('scroll')));})();
 }};
