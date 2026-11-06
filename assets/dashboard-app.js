@@ -684,12 +684,12 @@ decorateTables();updateControlState();updateNavigation();
 (()=>{
  const data=D.fuguo_rankings;if(!data)return;
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const number=v=>Number(v).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+ const number=v=>Number(v).toLocaleString('zh-CN',{minimumFractionDigits:1,maximumFractionDigits:1});
  document.querySelector('#fuguoRankingRange').textContent=D.periodLabel+' · '+D.range+' · 非货非债ETF';
  document.querySelector('#fuguoRankingGrid').innerHTML=[['inflow','净流入TOP10','in'],['outflow','净流出TOP10','out']].map(([key,title,kind])=>{
  const rows=data[key]||[];
  return '<article class="fuguo-ranking-card '+kind+'"><h3>'+title+'</h3><div class="tablewrap"><table><thead><tr><th>排名</th><th>ETF简称</th><th>'+ (kind==='in'?'净流入':'净流出')+'（亿）</th><th>最新规模（亿）</th><th title="最新规模占对应竞品组总规模的比例">市占率</th><th title="最新规模在对应竞品组中的排名 / 产品总数">规模排名</th></tr></thead><tbody>'+ (rows.length?rows.map((r,i)=>{
- const share=Number.isFinite(r.share)?(r.share*100).toFixed(2)+'%':'—';
+ const share=Number.isFinite(r.share)?(r.share*100).toFixed(1)+'%':'—';
  const rank=Number.isInteger(r.scaleRank)&&Number.isInteger(r.peerCount)?r.scaleRank+'/'+r.peerCount:'—';
  return '<tr><td><span class="fg-rank '+(i<3?'top':'')+'">'+(i+1)+'</span></td><td>'+esc(r.name)+'</td><td class="fg-flow '+(r.flow>0?'up':'down')+'">'+(r.flow>0?'+':'−')+number(Math.abs(r.flow))+'</td><td>'+number(r.scale)+'</td><td class="fg-share">'+esc(share)+'</td><td class="fg-scale-rank">'+esc(rank)+'</td></tr>'}).join(''):'<tr><td colspan="6" class="empty">本区间暂无'+(kind==='in'?'净流入':'净流出')+'产品</td></tr>')+'</tbody></table></div></article>';
  }).join('');
