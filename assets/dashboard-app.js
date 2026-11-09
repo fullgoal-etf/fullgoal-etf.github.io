@@ -56,7 +56,7 @@ window.ETF_NEWFUND_PERIOD=D;
 const finiteNumber=v=>typeof v==='number'&&Number.isFinite(v);
 const roundedValue=(v,d=1)=>{const rounded=Number(v.toFixed(d));return Object.is(rounded,-0)?0:rounded};
 const fmt=(v,d=1)=>finiteNumber(v)?roundedValue(v,d).toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d}):(v===null||v===undefined||v===''||typeof v==='number'?'-':esc(v));
-const pct=v=>finiteNumber(v)?fmt(v*100,1)+'%':fmt(v);
+const pct=v=>finiteNumber(v)?fmt(v*100,0)+'%':fmt(v);
 const signed=v=>finiteNumber(v)?(roundedValue(v,1)>0?'+':'')+fmt(v,1):fmt(v);
 const flowProduct=v=>String(v??'-').replace(/[（(]([+-]?\d+(?:\.\d+)?)[）)]\s*$/,(_,n)=>`（${Number(n).toFixed(1)}）`);
 const short=v=>String(v??'-').replace(/基金管理股份有限公司|基金管理有限责任公司|基金管理有限公司|基金有限公司|资产管理有限公司|基金管理|股份有限公司|有限责任公司|有限公司|基金$/g,'');
@@ -404,7 +404,7 @@ decorateTables();updateControlState();updateNavigation();
 
 (()=>{
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const pct=v=>Number.isFinite(v)?(v*100).toFixed(2)+'%':'—';
+  const pct=v=>Number.isFinite(v)?(v*100).toFixed(0)+'%':'—';
   const bp=v=>Number.isFinite(v)?(Math.abs(v)<.05?'0.0':(v>0?'+':'')+v.toFixed(1))+' BP':'—';
   const pair=window.ETF_PRIMARY_PAIRS[ACTIVE_PERIOD],historyData=window.ETF_CORRECTED_HISTORY;
   const panel=document.querySelector('#market-overview'),tabs=panel.querySelector('#marketOverviewTabs');
@@ -511,7 +511,7 @@ decorateTables();updateControlState();updateNavigation();
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const period=window.ETF_DATA_META.periods[ACTIVE_PERIOD],pair=window.ETF_PRIMARY_PAIRS[ACTIVE_PERIOD];
   const money=v=>Number(v).toLocaleString('zh-CN',{minimumFractionDigits:1,maximumFractionDigits:1});
-  const signed=v=>(v>0?'+':'')+money(v),pct=v=>(v*100).toFixed(2)+'%',bp=v=>(Math.abs(v)<.05?'0.0':(v>0?'+':'')+v.toFixed(1))+' BP';
+  const signed=v=>(v>0?'+':'')+money(v),pct=v=>(v*100).toFixed(0)+'%',bp=v=>(Math.abs(v)<.05?'0.0':(v>0?'+':'')+v.toFixed(1))+' BP';
   const tone=v=>v>.0000001?'up':v<-.0000001?'down':'';
   const groupName=name=>name==='全市场'?'全市场（非货非债）':name==='港股'?'跨境-港股':name==='非港股'?'跨境-非港股':name;
   const total=pair.groups[0],fg=D.companies.find(row=>String(row[1]).includes('富国'));
@@ -627,7 +627,7 @@ decorateTables();updateControlState();updateNavigation();
         const raw=resolveDirectionSource(original,index);if(!raw)return;
         const own=String(raw[9]??'-').trim()!=='-',change=own?getDirectionChangeBP(raw):null,contribution=getFlowContribution(raw),id='upgrade-direction-detail-'+(++rowSequence);
         const row=doc.createElement('tr');row.classList.toggle('upgrade-direction-alt',index%2===1);row.dataset.directionName=String(raw[1]);row.dataset.upgradeDirectionCategory=String(raw[2]);
-        row.innerHTML='<td><span class="rank-badge '+(index<3?'top':'')+'">'+(index+1)+'</span></td><td class="upgrade-direction-name">'+esc(raw[1])+(doc.querySelector('[data-direction-category].active')?.dataset.directionCategory==='全部'?'<span class="upgrade-direction-category">'+esc(String(raw[2]).replace(/^港股$/,'跨境-港股').replace(/^非港股$/,'跨境-非港股'))+'</span>':'')+'</td><td>'+money(raw[3])+'</td><td>'+(own?money(raw[4]):'—')+'</td><td class="'+(raw[5]>0?'up':raw[5]<0?'down':'')+'">'+signed(raw[5])+'</td><td class="'+(raw[6]>0?'up':raw[6]<0?'down':'')+'">'+(own?signed(raw[6]):'—')+ '</td><td class="direction-share-combined">'+(own?(Number(raw[10])*100).toFixed(2)+'%'+(Number.isFinite(change)?'<span class="'+(change>0?'up':change<0?'down':'')+'">（'+(change>0?'+':'')+change.toFixed(1)+'BP）</span>':''):'—')+'</td><td class="upgrade-direction-top3">'+original.cells[8].innerHTML+'</td><td><button class="upgrade-direction-toggle" type="button" aria-expanded="false" aria-controls="'+id+'">查看竞品</button></td>';
+        row.innerHTML='<td><span class="rank-badge '+(index<3?'top':'')+'">'+(index+1)+'</span></td><td class="upgrade-direction-name">'+esc(raw[1])+(doc.querySelector('[data-direction-category].active')?.dataset.directionCategory==='全部'?'<span class="upgrade-direction-category">'+esc(String(raw[2]).replace(/^港股$/,'跨境-港股').replace(/^非港股$/,'跨境-非港股'))+'</span>':'')+'</td><td>'+money(raw[3])+'</td><td>'+(own?money(raw[4]):'—')+'</td><td class="'+(raw[5]>0?'up':raw[5]<0?'down':'')+'">'+signed(raw[5])+'</td><td class="'+(raw[6]>0?'up':raw[6]<0?'down':'')+'">'+(own?signed(raw[6]):'—')+ '</td><td class="direction-share-combined">'+(own?(Number(raw[10])*100).toFixed(0)+'%'+(Number.isFinite(change)?'<span class="'+(change>0?'up':change<0?'down':'')+'">（'+(change>0?'+':'')+change.toFixed(1)+'BP）</span>':''):'—')+'</td><td class="upgrade-direction-top3">'+original.cells[8].innerHTML+'</td><td><button class="upgrade-direction-toggle" type="button" aria-expanded="false" aria-controls="'+id+'">查看竞品</button></td>';
         const detail=doc.createElement('tr');detail.id=id;detail.className='upgrade-direction-detailrow hidden';
         detail.innerHTML='<td colspan="9"><div class="upgrade-direction-details"></div></td>';
         row.querySelector('button').addEventListener('click',async()=>{const button=row.querySelector('button'),open=detail.classList.contains('hidden');detail.classList.toggle('hidden',!open);button.setAttribute('aria-expanded',String(open));button.textContent=open?'收起':'查看竞品';if(open&&!detail.dataset.loaded){const epoch=window.ETF_CURRENT_PERIOD;button.disabled=true;try{const html=await window.ETF_DIRECTION_PEERS(String(raw[1]),String(raw[2]),kind);if(window.ETF_CURRENT_PERIOD!==epoch||!detail.isConnected)return;detail.firstElementChild.firstElementChild.innerHTML=html;detail.dataset.loaded='1'}catch(e){detail.firstElementChild.firstElementChild.textContent='竞品加载失败，请收起后重试'}finally{button.disabled=false}}});
@@ -689,7 +689,7 @@ decorateTables();updateControlState();updateNavigation();
  document.querySelector('#fuguoRankingGrid').innerHTML=[['inflow','净流入TOP10','in'],['outflow','净流出TOP10','out']].map(([key,title,kind])=>{
  const rows=data[key]||[];
  return '<article class="fuguo-ranking-card '+kind+'"><h3>'+title+'</h3><div class="tablewrap"><table><thead><tr><th>排名</th><th>ETF简称</th><th>'+ (kind==='in'?'净流入':'净流出')+'（亿）</th><th>最新规模（亿）</th><th title="最新规模占对应竞品组总规模的比例">市占率及变化</th><th title="最新规模在对应竞品组中的排名 / 产品总数">规模排名</th></tr></thead><tbody>'+ (rows.length?rows.map((r,i)=>{
- const share=Number.isFinite(r.share)?(r.share*100).toFixed(1)+'%':'—';
+ const share=Number.isFinite(r.share)?(r.share*100).toFixed(0)+'%':'—';
  const rank=Number.isInteger(r.scaleRank)&&Number.isInteger(r.peerCount)?r.scaleRank+'/'+r.peerCount:'—';
  return '<tr><td><span class="fg-rank '+(i<3?'top':'')+'">'+(i+1)+'</span></td><td>'+esc(r.name)+'</td><td class="fg-flow '+(r.flow>0?'up':'down')+'">'+(r.flow>0?'+':'−')+number(Math.abs(r.flow))+'</td><td>'+number(r.scale)+'</td><td class="fg-share">'+esc(share)+(Number.isFinite(r.shareChangeBp)?'<span style="color:'+(Math.round(r.shareChangeBp)>0?'#e5483f':Math.round(r.shareChangeBp)<0?'#008b80':'#61758b')+'">（'+(Math.round(r.shareChangeBp)>0?'+':'')+(Math.abs(r.shareChangeBp)<0.5?'0':r.shareChangeBp.toFixed(0))+'BP）</span>':'')+'</td><td class="fg-scale-rank">'+esc(rank)+'</td></tr>'}).join(''):'<tr><td colspan="6" class="empty">本区间暂无'+(kind==='in'?'净流入':'净流出')+'产品</td></tr>')+'</tbody></table></div></article>';
  }).join('');
