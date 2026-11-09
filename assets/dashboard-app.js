@@ -707,13 +707,16 @@ async function exportTable(table,button,status){
  button.disabled=true;button.textContent='正在导出…';status.textContent='';
  try{
   await document.fonts.ready;
-  const title=nameFor(table),width=Math.ceil(Math.max(table.scrollWidth,table.getBoundingClientRect().width));
+  const title=nameFor(table);let width=Math.ceil(Math.max(table.scrollWidth,table.getBoundingClientRect().width));
   host=document.createElement('div');host.className='table-export-sheet';host.style.cssText='position:absolute;left:-100000px;top:0;width:'+width+'px;z-index:-1';
   const heading=document.createElement('h3');heading.textContent=title;
   const caption=document.createElement('p');caption.className='table-export-caption';caption.textContent='ETF数据看板 · '+D.periodLabel+' · '+D.range;
   const clone=table.cloneNode(true),original=[table,...table.querySelectorAll('*')],copies=[clone,...clone.querySelectorAll('*')];
   const properties=['display','font-family','font-size','font-weight','font-style','line-height','color','background-color','background-image','text-align','vertical-align','white-space','word-break','overflow-wrap','padding-top','padding-bottom','padding-left','padding-right','border-top','border-right','border-bottom','border-left','border-collapse','border-spacing','border-radius','box-sizing','width','min-width','max-width','height','grid-template-columns','grid-template-rows','grid-column','grid-row','gap','align-items','justify-content','flex-direction','flex-wrap','flex','margin-top','margin-bottom','margin-left','margin-right'];
   copies.forEach((node,i)=>{const style=getComputedStyle(original[i]);for(const property of properties)node.style.setProperty(property,style.getPropertyValue(property),'important');node.removeAttribute('id');node.style.setProperty('position','static','important');node.style.setProperty('transform','none','important');node.style.setProperty('animation','none','important');if(style.textOverflow==='ellipsis'){node.style.setProperty('white-space','normal','important');node.style.setProperty('overflow','visible','important');node.style.setProperty('text-overflow','clip','important');}});
+  const actionColumns=[...table.tHead?.rows[0]?.cells||[]].map((cell,i)=>({cell,i})).filter(x=>x.cell.textContent.trim()==='查看竞品');
+  for(const {cell,i} of actionColumns.reverse()){width-=cell.getBoundingClientRect().width;for(const row of clone.rows){if(row.cells.length===table.tHead.rows[0].cells.length)row.cells[i]?.remove();else for(const c of row.cells)if(c.colSpan>i)c.colSpan=Math.max(1,c.colSpan-1)}clone.querySelector('colgroup')?.children[i]?.remove()}
+  host.style.width=width+'px';
   clone.style.setProperty('width',width+'px','important');clone.style.setProperty('max-height','none','important');clone.style.setProperty('overflow','visible','important');clone.style.setProperty('table-layout','fixed','important');
   host.append(heading,caption,clone);document.body.append(host);
   await new Promise(requestAnimationFrame);
